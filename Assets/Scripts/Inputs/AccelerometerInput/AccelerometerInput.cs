@@ -7,8 +7,9 @@ namespace App.TheValleyChase.Input.AccelerometerInput {
 
     public class AccelerometerInput : MonoBehaviour {
 
-        private Quaternion calibrationQuaternion;
+        private float sensitivity = 1f;
 
+        private Quaternion calibrationQuaternion;
         private List<IOnAccelerometerInput> listeners;
 
         void Awake() {
@@ -48,6 +49,10 @@ namespace App.TheValleyChase.Input.AccelerometerInput {
         public Vector3 FixAcceleration(Vector3 acceleration) {
             Vector3 fixedAcceleration = calibrationQuaternion * acceleration;
             return fixedAcceleration;
+        }
+
+        public float GetSensitivity() {
+            return sensitivity;
         }
     }
 }
