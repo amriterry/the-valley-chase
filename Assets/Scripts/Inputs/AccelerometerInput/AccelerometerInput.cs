@@ -21,8 +21,11 @@ namespace App.TheValleyChase.Input.AccelerometerInput {
         }
 
         void Update() {
+
+            Debug.Log("Update of AccelerometerInput");
 #if MOBILE_INPUT
-            InvokeListeners(FixAcceleration(Input.acceleration));
+            Debug.Log("Invoking Listeners");
+            InvokeListeners(FixAcceleration(UnityEngine.Input.acceleration));
 #endif
         }
 

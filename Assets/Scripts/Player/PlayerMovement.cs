@@ -10,6 +10,7 @@ public class PlayerMovement : MonoBehaviour, IOnAccelerometerInput,IOnGestureInp
 
     public float turnSpeed = 8f;
     public float jumpPower = 6f;
+    public float slideTime = 1f;
     public float groundCheckDistance = 0.3f;
 
     private AccelerometerInput accelerometerInput;
@@ -20,8 +21,9 @@ public class PlayerMovement : MonoBehaviour, IOnAccelerometerInput,IOnGestureInp
 
     private bool onGround;
     private bool canMove;
-    private float speed = 1f;
     private bool isRotating;
+    private bool isSliding;
+    private float speed = 1f;   
 
     void Awake() {
         accelerometerInput = GameObject.FindObjectOfType<AccelerometerInput>();
@@ -48,24 +50,38 @@ public class PlayerMovement : MonoBehaviour, IOnAccelerometerInput,IOnGestureInp
         if (canMove) {
             speed = 1f;
 
-            if (isRotating) {
-                Vector3 angle = transform.rotation.eulerAngles - targetRotation.eulerAngles;
-                if (transform.rotation == targetRotation || Mathf.Abs(angle.magnitude) <= 3f) {
-                    transform.rotation = targetRotation;
-                    isRotating = false;
-                } else {
-                    transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
-                }
-            } else {
-                if(transform.rotation.eulerAngles != targetRotation.eulerAngles) {
-                    transform.rotation = targetRotation;
-                }
-            }
+            UpdateRotation();
+            UpdateSliding();
         } else {
             speed = 0f;
         }
 
         UpdateAnimator();
+    }
+
+    private void UpdateSliding() {
+        if (isSliding) {
+            if (animator.GetCurrentAnimatorStateInfo(0).IsName("Sliding") && animator.GetNextAnimatorStateInfo(0).IsName("Grounded")) {
+                transform.rotation = transform.rotation * Quaternion.EulerAngles(0, -90, 0);
+                isSliding = false;
+            }
+        }
+    }
+
+    private void UpdateRotation() {
+        if (isRotating) {
+            Vector3 angle = transform.rotation.eulerAngles - targetRotation.eulerAngles;
+            if (transform.rotation == targetRotation || Mathf.Abs(angle.magnitude) <= 3f) {
+                transform.rotation = targetRotation;
+                isRotating = false;
+            } else {
+                transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
+            }
+        } else {
+            if (transform.rotation.eulerAngles != targetRotation.eulerAngles) {
+                transform.rotation = targetRotation;
+            }
+        }
     }
 
     private void UpdateAnimator() {
@@ -83,6 +99,8 @@ public class PlayerMovement : MonoBehaviour, IOnAccelerometerInput,IOnGestureInp
         if (onGround) {
             animator.SetFloat("JumpLeg", jumpLeg);
         }
+
+        animator.SetBool("Sliding", isSliding);
 
         animator.SetBool("OnGround", onGround);
     }
@@ -104,6 +122,7 @@ public class PlayerMovement : MonoBehaviour, IOnAccelerometerInput,IOnGestureInp
     }
 
     public void OnAccelerometerDetected(Vector3 fixedAcceleration) {
+        Debug.Log("" + fixedAcceleration.x);
         MoveHorizontally(fixedAcceleration.x);
     }
 
@@ -117,6 +136,7 @@ public class PlayerMovement : MonoBehaviour, IOnAccelerometerInput,IOnGestureInp
                 Jump();
                 break;
             case GestureType.SWIPE_DOWN:
+                Slide();
                 break;
             case GestureType.SWIPE_LEFT:
                 TurnLeft();
@@ -124,6 +144,14 @@ public class PlayerMovement : MonoBehaviour, IOnAccelerometerInput,IOnGestureInp
             case GestureType.SWIPE_RIGHT:
                 TurnRight();
                 break;
+        }
+    }
+
+    private void Slide() {
+        if (onGround && !isSliding) {
+            isSliding = true;
+
+            transform.rotation = transform.rotation * Quaternion.EulerAngles(0, 90, 0);
         }
     }
 
@@ -136,7 +164,7 @@ public class PlayerMovement : MonoBehaviour, IOnAccelerometerInput,IOnGestureInp
     }
 
     void ApplyRotation(float degrees) {
-        if (!isRotating) {
+        if (!isRotating && !isSliding && onGround) {
             Quaternion newRotation = Quaternion.identity;
             newRotation = Quaternion.AngleAxis(degrees, Vector3.up);
             targetRotation = transform.rotation * newRotation;
