@@ -62,7 +62,6 @@ public class PlayerMovement : MonoBehaviour, IOnAccelerometerInput,IOnGestureInp
     private void UpdateSliding() {
         if (isSliding) {
             if (animator.GetCurrentAnimatorStateInfo(0).IsName("Sliding") && animator.GetNextAnimatorStateInfo(0).IsName("Grounded")) {
-                transform.rotation = transform.rotation * Quaternion.EulerAngles(0, -90, 0);
                 isSliding = false;
             }
         }
@@ -122,7 +121,6 @@ public class PlayerMovement : MonoBehaviour, IOnAccelerometerInput,IOnGestureInp
     }
 
     public void OnAccelerometerDetected(Vector3 fixedAcceleration) {
-        Debug.Log("" + fixedAcceleration.x);
         MoveHorizontally(fixedAcceleration.x);
     }
 
@@ -150,8 +148,6 @@ public class PlayerMovement : MonoBehaviour, IOnAccelerometerInput,IOnGestureInp
     private void Slide() {
         if (onGround && !isSliding) {
             isSliding = true;
-
-            transform.rotation = transform.rotation * Quaternion.EulerAngles(0, 90, 0);
         }
     }
 

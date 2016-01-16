@@ -7,7 +7,7 @@ namespace App.TheValleyChase.Input.AccelerometerInput {
 
     public class AccelerometerInput : MonoBehaviour {
 
-        private float sensitivity = 1f;
+        private float sensitivity = 0.5f;
 
         private Quaternion calibrationQuaternion;
         private List<IOnAccelerometerInput> listeners;
@@ -21,10 +21,7 @@ namespace App.TheValleyChase.Input.AccelerometerInput {
         }
 
         void Update() {
-
-            Debug.Log("Update of AccelerometerInput");
 #if MOBILE_INPUT
-            Debug.Log("Invoking Listeners");
             InvokeListeners(FixAcceleration(UnityEngine.Input.acceleration));
 #endif
         }
