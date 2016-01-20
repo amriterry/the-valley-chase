@@ -4,6 +4,7 @@ using App.TheValleyChase.Input.AccelerometerInput;
 using App.TheValleyChase.Input.GestureInput.Contracts;
 using App.TheValleyChase.Input.AccelerometerInput.Contracts;
 using App.TheValleyChase.Framework;
+using System;
 
 namespace App.TheValleyChase.Player {
 
@@ -32,6 +33,7 @@ namespace App.TheValleyChase.Player {
         private bool isSliding;
         private float speed;
         private float originalCapsuleHeight;
+        private float tiltForceMultiplier = 150f;
 
         /// <summary>
         /// Unity's Awake function.
@@ -74,14 +76,22 @@ namespace App.TheValleyChase.Player {
 
             if (canMove) {
                 speed = 1f;
-
                 UpdateRotation();
                 UpdateSliding();
+                UpdateTiltForce();
             } else {
                 speed = 0f;
             }
 
             UpdateAnimator();
+        }
+
+        private void UpdateTiltForce() {
+            if(isSliding || !onGround) {
+                tiltForceMultiplier = 25f;
+            } else {
+                tiltForceMultiplier = 150f;
+            }
         }
 
         /// <summary>
@@ -194,7 +204,8 @@ namespace App.TheValleyChase.Player {
         /// </summary>
         /// <param name="x"></param>
         private void MoveHorizontally(float x) {
-            transform.position = transform.position + Vector3.Cross(transform.up, transform.forward) * x * accelerometerInput.GetSensitivity();
+            rigidBody.AddForce(Vector3.Cross(transform.up, transform.forward) * x * accelerometerInput.GetSensitivity() * tiltForceMultiplier);
+            //transform.position = transform.position + Vector3.Cross(transform.up, transform.forward) * x * accelerometerInput.GetSensitivity();
         }
 
         /// <summary>

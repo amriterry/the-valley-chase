@@ -7,7 +7,7 @@ namespace App.TheValleyChase.Input.AccelerometerInput {
 
     public class AccelerometerInput : MonoBehaviour {
 
-        private float sensitivity = 0.5f;
+        private float sensitivity = 1f;
 
         private Quaternion calibrationQuaternion;
         private List<IOnAccelerometerInput> listeners;
