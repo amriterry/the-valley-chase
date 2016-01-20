@@ -4,5 +4,6 @@
         public const string Player = "Player";
         public const string Obstacle = "Obstacle";
         public const string GameController = "GameController";
+        public const string TurnTrigger = "TurnTrigger";
     }
 }

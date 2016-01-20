@@ -5,7 +5,6 @@ using App.TheValleyChase.Input.GestureInput.Contracts;
 using App.TheValleyChase.Input.AccelerometerInput.Contracts;
 using App.TheValleyChase.Framework;
 
-
 namespace App.TheValleyChase.Player {
 
     public class PlayerMovement : MonoBehaviour, IOnAccelerometerInput, IOnGestureInput {
@@ -15,8 +14,7 @@ namespace App.TheValleyChase.Player {
         public float slideTime = 1f;
         public float slidingHeight = 1f;
         public float groundCheckDistance = 0.3f;
-
-
+        
         private AccelerometerInput accelerometerInput;
         private GestureInput gestureInput;
         private Rigidbody rigidBody;
@@ -25,9 +23,11 @@ namespace App.TheValleyChase.Player {
         private Vector3 originalCapsuleCenter;
         private CapsuleCollider colider;
         private Transform playerMesh;
+        private TurnTrigger turnableInfo;
 
         private bool onGround;
         private bool canMove;
+        private bool canRotate;
         private bool isRotating;
         private bool isSliding;
         private float speed;
@@ -246,14 +246,18 @@ namespace App.TheValleyChase.Player {
         /// Turns the player to right.
         /// </summary>
         private void TurnRight() {
-            ApplyRotation(90);
+            if (canRotate && turnableInfo != null && turnableInfo.canTurnRight) {
+                ApplyRotation(90);
+            }
         }
 
         /// <summary>
         /// Turns the player to left.
         /// </summary>
         private void TurnLeft() {
-            ApplyRotation(-90);
+            if (canRotate && turnableInfo != null && turnableInfo.canTurnLeft) {
+                ApplyRotation(-90);
+            }
         }
 
         /// <summary>
@@ -261,11 +265,12 @@ namespace App.TheValleyChase.Player {
         /// </summary>
         /// <param name="degrees"></param>
         void ApplyRotation(float degrees) {
-            if (!isRotating && !isSliding && onGround) {
+            if (canRotate && !isRotating && !isSliding && onGround) {
                 Quaternion newRotation = Quaternion.identity;
                 newRotation = Quaternion.AngleAxis(degrees, Vector3.up);
                 targetRotation = transform.rotation * newRotation;
                 isRotating = true;
+                canRotate = false;
             }
         }
 
@@ -274,6 +279,16 @@ namespace App.TheValleyChase.Player {
         /// </summary>
         public void StopMovement() {
             canMove = false;
+        }
+
+        public void EnableTurning(TurnTrigger turnTrigger) {
+            canRotate = true;
+            turnableInfo = turnTrigger;
+        }
+
+        public void DisableTurning() {
+            canRotate = false;
+            turnableInfo = null;
         }
     }
 
